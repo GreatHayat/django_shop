@@ -1,0 +1,141 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+{% block title %}
+<title>Cart</title>
+{% endblock %}
+{% block content %}
+<div class="breadcrumb-area">
+    <div class="container">
+        <div class="breadcrumb-content">
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li class="active">Shopping Cart</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- Li's Breadcrumb Area End Here -->
+<!--Shopping Cart Area Strat-->
+<div class="Shopping-cart-area pt-60 pb-60">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="table-content table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="li-product-remove">remove</th>
+                                <th class="li-product-thumbnail">images</th>
+                                <th class="cart-product-name">Product</th>
+                                <th class="li-product-price">Unit Price</th>
+                                <th class="li-product-quantity">Quantity</th>
+                                <th class="li-product-subtotal">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in cart.products.all %}
+                            <tr>
+                                <td class="li-product-remove"><a href="#" id="remove-icon"
+                                        data-product="{{product.product.slug}}"><i class="fa fa-times"></i></a>
+                                </td>
+                                <td class="li-product-thumbnail"><a
+                                        href="{% url 'product-details' product.product.slug %}" target="_blank"><img
+                                            src="{{product.product.feature_image.url}}" width="150px" height="150px"
+                                            alt="{{product.product.title}}"></a></td>
+                                <td class="li-product-name"><a href="#">{{product.product.title}}</a></td>
+                                <td class="li-product-price">
+                                    {% if product.product.discount_price %}
+                                    <span class="amount">${{product.product.get_discount_price}}</span>
+                                    {% else %}
+                                    <span class="amount">${{product.product.price}}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="quantity">
+                                    <label>Quantity</label>
+                                    <div class="cart-plus-minus">
+                                        <input class="cart-plus-minus-box" name="quantity" value="{{product.quantity}}"
+                                            type="text">
+                                        <div class="dec qtybutton"><i class="fa fa-angle-down"></i></div>
+                                        <div class="inc qtybutton"><i class="fa fa-angle-up"></i>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="product-subtotal"><span class="amount">${{product.get_total_price}}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="coupon-all">
+                            <form method="POST" id="coupon-form">
+                                {% csrf_token %}
+                                <div class="coupon">
+                                    <input id="coupon_code" class="input-text" name="coupon_code"
+                                        placeholder="Coupon code" type="text">
+                                    <input class="button" name="apply_coupon" value="Apply coupon" type="submit">
+                                </div>
+                                <div class="coupon2">
+                                    <input class="button" name="update_cart" value="Update cart" type="submit">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5 ml-auto">
+                        <div class="cart-page-total">
+                            <h2>Cart totals</h2>
+                            <ul>
+                                <li>Subtotal <span>$130.00</span></li>
+                                <li>Total <span id="cart-amount">${{request.user.user_cart.get.get_total}}</span>
+                                </li>
+                            </ul>
+                            <a href="#">Proceed to checkout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% block script %}
+<script>
+    $(document).on('submit', '#coupon-form', function (e) {
+        e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "/cart/apply-coupon",
+            data: {
+                coupon_code: $("#coupon_code").val(),
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            },
+            dataType: "json",
+            success: function (response) {
+                if (response.success) {
+                    swal({
+                        title: "Congratulations!",
+                        text: response.success,
+                        icon: "success",
+                    });
+                    $('#cart-amount').html(`$${response.total}`);
+                }
+                if (response.message) {
+                    swal({
+                        title: "Invalid Coupon",
+                        text: response.message,
+                        icon: "error",
+                    });
+                }
+            },
+            error: function (response) {
+                console.log(response)
+            }
+        });
+    });
+
+</script>
+{% endblock %}
+{% endblock %}

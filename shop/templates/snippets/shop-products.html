@@ -1,0 +1,68 @@
+{% for product in products%}
+<div class="col-lg-3 col-md-4 col-sm-6 mt-40">
+    <!-- single-product-wrap start -->
+    <div class="single-product-wrap">
+        <div class="product-image">
+            <a href="{% url 'product-details' product.slug %}">
+                <img src="{{product.feature_image.url}}" alt="{{product.title}}">
+            </a>
+            {% if product.is_sale %}
+            <span class="sticker" title="Product on Sale">Sale</span>
+            {% elif product.is_featured %}
+            <span class="sticker" title="Featured Product">Ftd</span>
+            {% else %}
+            <span class="sticker" title="Newest Product">New</span>
+            {% endif %}
+        </div>
+        <div class="product_desc">
+            <div class="product_desc_info">
+                <div class="product-review">
+                    <h5 class="manufacturer">
+                        <a title="Product Category">{{product.category.name}}</a>
+                    </h5>
+                    <div class="rating-box">
+                        <ul class="rating">
+                            <li><i class="fa fa-star-o"></i></li>
+                            <li><i class="fa fa-star-o"></i></li>
+                            <li><i class="fa fa-star-o"></i></li>
+                            <li class="no-star"><i class="fa fa-star-o"></i></li>
+                            <li class="no-star"><i class="fa fa-star-o"></i></li>
+                        </ul>
+                    </div>
+                </div>
+                <h4><a class="product_name" href="{% url 'product-details' product.slug %}">{{product.title}}</a>
+                </h4>
+                <div class="price-box">
+                    {% if product.discount_price and product.discount_percentage %}
+                    <span class="new-price new-price-2">${{product.get_discount_price}}</span>
+                    <span class="old-price">${{product.price}}</span>
+                    <span class="discount-percentage">{{product.discount_percentage}}%</span>
+                    {% else %}
+                    <span class="new-price">{{product.price}}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="add-actions">
+                <ul class="add-actions-link">
+                    {% if not product.user_cart_products.get %}
+                    <form method="post" id="quick-add-to-cart-form" data-prdouctslug={{product.slug}}>
+                        {% csrf_token %}
+                        <button type="submit" class="add-cart" id="quick-cart-btn">Add to cart</button>
+                    </form>
+                    {% else %}
+                    <button class="add-cart"><a href="" style="text-decoration: none;">View Cart</a></button>
+                    {% endif %}
+                    <li id="quick-view" data-product="{{product.id}}"><a href="#" title="quick view"
+                            class="quick-view-btn" data-toggle="modal" data-target="#exampleModalCenter"><i
+                                class="fa fa-eye"></i></a></li>
+                    <li id="wish-btn" data-product="{{product.id}}"><a class="links-details" style="cursor: pointer;"><i
+                                style="color: {% if product.wish_product.get.product == product %} tomato {% endif %}"
+                                class="{% if product.wish_product.get.product == product %} fa fa-heart {% else %} fa fa-heart-o {% endif %}"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- single-product-wrap end -->
+</div>
+{% endfor %}
